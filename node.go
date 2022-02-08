@@ -7,6 +7,7 @@ import (
 type NodePath interface {
 	Path() string
 	IsDir() bool
+	Type() os.FileMode
 	Nodes() []NodePath
 	Append(node NodePath)
 }
@@ -26,9 +27,6 @@ func (n *node) Path() string {
 }
 
 func (n *node) IsDir() bool {
-	if n.info == nil {
-		return true
-	}
 	return n.info.IsDir()
 }
 
@@ -37,9 +35,13 @@ func (n *node) Nodes() []NodePath {
 }
 
 func (n *node) Append(node NodePath) {
-	if !n.IsDir() {
+	if !n.info.IsDir() {
 		return
 	}
 
 	n.nodes = append(n.nodes, node)
+}
+
+func (n *node) Type() os.FileMode {
+	return n.info.Mode().Type()
 }
