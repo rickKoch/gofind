@@ -105,7 +105,7 @@ func TestNewFind(t *testing.T) {
 	}
 
 	for _, value := range testData {
-		find := NewFind(value.expression, value.fs, nil)
+		find := NewFind(value.expression, value.fs, nil, nil)
 		find.Run()
 		result := find.Results()
 		if len(result) != value.matchNumber {
@@ -189,7 +189,7 @@ func TestFindMode(t *testing.T) {
 	}
 
 	for _, value := range testData {
-		find := NewFind(value.expression, value.fs, &value.mode)
+		find := NewFind(value.expression, value.fs, &value.mode, nil)
 		find.Run()
 		result := find.Results()
 		if len(result) != value.matchNumber {

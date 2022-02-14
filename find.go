@@ -9,6 +9,7 @@ import (
 
 type Find interface {
 	Run()
+	Name() string
 	Results() []string
 	Node() NodePath
 }
@@ -18,13 +19,15 @@ type find struct {
 	fileSystem fs.FS
 	node       NodePath
 	mode       *fs.FileMode
+	name       *string
 }
 
-func NewFind(expression string, fileSystem fs.FS, mode *fs.FileMode) *find {
+func NewFind(expression string, fileSystem fs.FS, mode *fs.FileMode, name *string) *find {
 	return &find{
 		expression: expression,
 		fileSystem: fileSystem,
 		mode:       mode,
+		name:       name,
 	}
 }
 
@@ -35,6 +38,7 @@ func (f *find) Run() {
 		fmt.Println(err)
 		return
 	}
+	defer dir.Close()
 
 	info, err := dir.Stat()
 	if err != nil {
@@ -60,7 +64,7 @@ func (f *find) Results() []string {
 	var result []string
 	if f.Node().Nodes() != nil {
 		for _, node := range f.Node().Nodes() {
-			readNodes(node, &result, f.mode)
+			readNodes(node, &result, f.mode, f.name)
 		}
 	}
 
@@ -71,16 +75,22 @@ func (f *find) Node() NodePath {
 	return f.node
 }
 
-func readNodes(node NodePath, result *[]string, mode *os.FileMode) {
-	if mode == nil || *mode == node.Type() {
-		*result = append(*result, node.Path())
-	}
-
+func readNodes(node NodePath, result *[]string, mode *os.FileMode, name *string) {
 	if node.Nodes() != nil {
 		for _, n := range node.Nodes() {
-			readNodes(n, result, mode)
+			readNodes(n, result, mode, name)
 		}
 	}
+
+	if mode != nil && *mode != node.Type() {
+		return
+	}
+
+	if name != nil && *name != node.Name() {
+		return
+	}
+
+	*result = append(*result, node.Path())
 }
 
 func readDir(node NodePath, expression string, fileSystem fs.FS) {

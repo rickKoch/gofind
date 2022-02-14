@@ -10,6 +10,7 @@ type NodePath interface {
 	Type() os.FileMode
 	Nodes() []NodePath
 	Append(node NodePath)
+	Name() string
 }
 
 type node struct {
@@ -28,6 +29,10 @@ func (n *node) Path() string {
 
 func (n *node) IsDir() bool {
 	return n.info.IsDir()
+}
+
+func (n *node) Name() string {
+	return n.info.Name()
 }
 
 func (n *node) Nodes() []NodePath {
